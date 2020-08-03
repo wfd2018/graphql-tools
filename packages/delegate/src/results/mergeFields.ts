@@ -149,21 +149,21 @@ export function mergeFields(
   }
 
   let containsPromises = false;
-  const maybePromises: Promise<any> | any = [];
+  const resultMap: Map<Promise<any> | any, SelectionSetNode> = new Map();
   delegationMap.forEach((selectionSet: SelectionSetNode, s: SubschemaConfig) => {
     const maybePromise = s.merge[typeName].resolve(object, context, info, s, selectionSet);
-    maybePromises.push(maybePromise);
+    resultMap.set(maybePromise, selectionSet);
     if (!containsPromises && maybePromise instanceof Promise) {
       containsPromises = true;
     }
   });
 
   return containsPromises
-    ? Promise.all(maybePromises).then(results =>
+    ? Promise.all(resultMap.keys()).then(results =>
         mergeFields(
           mergedTypeInfo,
           typeName,
-          mergeProxiedResults(object, ...results),
+          mergeProxiedResults(info, object, results, Array.from(resultMap.values())),
           unproxiableFieldNodes,
           combineSubschemas(sourceSubschemaOrSourceSubschemas, proxiableSubschemas),
           nonProxiableSubschemas,
@@ -174,7 +174,7 @@ export function mergeFields(
     : mergeFields(
         mergedTypeInfo,
         typeName,
-        mergeProxiedResults(object, ...maybePromises),
+        mergeProxiedResults(info, object, Array.from(resultMap.keys()), Array.from(resultMap.values())),
         unproxiableFieldNodes,
         combineSubschemas(sourceSubschemaOrSourceSubschemas, proxiableSubschemas),
         nonProxiableSubschemas,
