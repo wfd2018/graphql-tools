@@ -33,7 +33,7 @@ function removeDescriptions(doc: DocumentNode) {
   return doc;
 }
 
-interface Options {
+export interface Options {
   noDescription?: boolean;
   esModule?: boolean;
   importHelpers?: boolean;
