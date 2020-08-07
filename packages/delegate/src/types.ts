@@ -87,7 +87,6 @@ export interface MergedTypeInfo {
   nonUniqueFields: Record<string, Array<SubschemaConfig>>;
   typeMaps: Map<SubschemaConfig, TypeMap>;
   selectionSets: Map<SubschemaConfig, SelectionSetNode>;
-  containsSelectionSet: Map<SubschemaConfig, Map<SelectionSetNode, boolean>>;
 }
 
 export interface ExecutionParams<TArgs = Record<string, any>, TContext = any> {
