@@ -3,14 +3,15 @@ import { FieldNode, SelectionNode, Kind, GraphQLResolveInfo, SelectionSetNode, G
 import { typesContainSelectionSet } from '@graphql-tools/utils';
 
 import { MergedTypeInfo, SubschemaConfig } from '../types';
-import { memoize3, memoize2 } from '../memoize';
+import { memoize4, memoize3, memoize2 } from '../memoize';
 
 import { mergeProxiedResults } from './mergeProxiedResults';
 
-const sortSubschemasByProxiability = memoize3(function (
+const sortSubschemasByProxiability = memoize4(function (
   mergedTypeInfo: MergedTypeInfo,
   sourceSubschemaOrSourceSubschemas: SubschemaConfig | Array<SubschemaConfig>,
-  targetSubschemas: Array<SubschemaConfig>
+  targetSubschemas: Array<SubschemaConfig>,
+  fieldNodes: Array<FieldNode>
 ): {
   proxiableSubschemas: Array<SubschemaConfig>;
   nonProxiableSubschemas: Array<SubschemaConfig>;
@@ -29,7 +30,18 @@ const sortSubschemasByProxiability = memoize3(function (
 
   targetSubschemas.forEach(t => {
     const selectionSet = mergedTypeInfo.selectionSets.get(t);
-    if (typesContainSelectionSet(types, selectionSet)) {
+    const fieldSelectionSets = mergedTypeInfo.fieldSelectionSets.get(t);
+    if (!typesContainSelectionSet(types, selectionSet)) {
+      nonProxiableSubschemas.push(t);
+    } else if (fieldSelectionSets == null) {
+      proxiableSubschemas.push(t);
+    } else if (
+      fieldNodes.every(fieldNode => {
+        const fieldName = fieldNode.name.value;
+        const fieldSelectionSet = fieldSelectionSets[fieldName];
+        return fieldSelectionSet == null || typesContainSelectionSet(types, fieldSelectionSet);
+      })
+    ) {
       proxiableSubschemas.push(t);
     } else {
       nonProxiableSubschemas.push(t);
@@ -145,7 +157,8 @@ export function mergeFields(
   const { proxiableSubschemas, nonProxiableSubschemas } = sortSubschemasByProxiability(
     mergedTypeInfo,
     sourceSubschemaOrSourceSubschemas,
-    targetSubschemas
+    targetSubschemas,
+    fieldNodes
   );
 
   const { delegationMap, unproxiableFieldNodes } = buildDelegationPlan(mergedTypeInfo, fieldNodes, proxiableSubschemas);

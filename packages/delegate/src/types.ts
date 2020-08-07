@@ -83,11 +83,11 @@ export interface ICreateRequest {
 export interface MergedTypeInfo {
   typeName: string;
   targetSubschemas: Map<SubschemaConfig, Array<SubschemaConfig>>;
-  selectionSet?: SelectionSetNode;
   uniqueFields: Record<string, SubschemaConfig>;
   nonUniqueFields: Record<string, Array<SubschemaConfig>>;
   typeMaps: Map<SubschemaConfig, TypeMap>;
   selectionSets: Map<SubschemaConfig, SelectionSetNode>;
+  fieldSelectionSets: Map<SubschemaConfig, Record<string, SelectionSetNode>>;
 }
 
 export interface ExecutionParams<TArgs = Record<string, any>, TContext = any> {
@@ -134,6 +134,7 @@ export interface SubschemaConfig {
 
 export interface MergedTypeConfig {
   selectionSet?: string;
+  fields?: Record<string, { selectionSet?: string }>;
   fieldName?: string;
   args?: (source: any) => Record<string, any>;
   key?: (originalResult: any) => any;

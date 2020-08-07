@@ -94,6 +94,7 @@ function createMergedTypes(
         const supportedBySubschemas: Record<string, Array<SubschemaConfig>> = Object.create({});
         const typeMaps: Map<SubschemaConfig, TypeMap> = new Map();
         const selectionSets: Map<SubschemaConfig, SelectionSetNode> = new Map();
+        const fieldSelectionSets: Map<SubschemaConfig, Record<string, SelectionSetNode>> = new Map();
 
         mergedTypeCandidates.forEach(typeCandidate => {
           const subschemaConfig = typeCandidate.subschema as SubschemaConfig;
@@ -113,6 +114,17 @@ function createMergedTypes(
           if (mergedTypeConfig.selectionSet) {
             const selectionSet = parseSelectionSet(mergedTypeConfig.selectionSet);
             selectionSets.set(subschemaConfig, selectionSet);
+          }
+
+          if (mergedTypeConfig.fields) {
+            const parsedFieldSelectionSets = Object.create(null);
+            Object.keys(mergedTypeConfig.fields).forEach(fieldName => {
+              const rawFieldSelectionSet = mergedTypeConfig.fields[fieldName].selectionSet;
+              if (rawFieldSelectionSet) {
+                parsedFieldSelectionSets[fieldName] = parseSelectionSet(rawFieldSelectionSet);
+              }
+            });
+            fieldSelectionSets.set(subschemaConfig, parsedFieldSelectionSets);
           }
 
           if (!mergedTypeConfig.resolve) {
@@ -170,6 +182,7 @@ function createMergedTypes(
           targetSubschemas,
           typeMaps,
           selectionSets,
+          fieldSelectionSets,
           uniqueFields: Object.create({}),
           nonUniqueFields: Object.create({}),
         };
