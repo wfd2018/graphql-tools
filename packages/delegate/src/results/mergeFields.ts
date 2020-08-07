@@ -2,7 +2,7 @@ import { FieldNode, SelectionNode, Kind, GraphQLResolveInfo, SelectionSetNode } 
 
 import { MergedTypeInfo, SubschemaConfig } from '../types';
 
-import { memoize3, memoize2 } from './memoize';
+import { memoize3, memoize2 } from '../memoize';
 import { mergeProxiedResults } from './mergeProxiedResults';
 
 const sortSubschemasByProxiability = memoize3(function (
