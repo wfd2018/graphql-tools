@@ -3,15 +3,14 @@ import { FieldNode, SelectionNode, Kind, GraphQLResolveInfo, SelectionSetNode, G
 import { typesContainSelectionSet } from '@graphql-tools/utils';
 
 import { MergedTypeInfo, SubschemaConfig } from '../types';
-import { memoize3, memoize2, memoize3Objectsand1Primitive } from '../memoize';
+import { memoize3, memoize2 } from '../memoize';
 
 import { mergeProxiedResults } from './mergeProxiedResults';
 
-const sortSubschemasByProxiability = memoize3Objectsand1Primitive(function (
+const sortSubschemasByProxiability = memoize3(function (
   mergedTypeInfo: MergedTypeInfo,
   sourceSubschemaOrSourceSubschemas: SubschemaConfig | Array<SubschemaConfig>,
-  targetSubschemas: Array<SubschemaConfig>,
-  typeName: string
+  targetSubschemas: Array<SubschemaConfig>
 ): {
   proxiableSubschemas: Array<SubschemaConfig>;
   nonProxiableSubschemas: Array<SubschemaConfig>;
@@ -25,6 +24,7 @@ const sortSubschemasByProxiability = memoize3Objectsand1Primitive(function (
     ? sourceSubschemaOrSourceSubschemas
     : [sourceSubschemaOrSourceSubschemas];
 
+  const typeName = mergedTypeInfo.typeName;
   const types = sourceSubschemas.map(sourceSubschema => sourceSubschema.schema.getType(typeName) as GraphQLObjectType);
 
   targetSubschemas.forEach(t => {
@@ -145,8 +145,7 @@ export function mergeFields(
   const { proxiableSubschemas, nonProxiableSubschemas } = sortSubschemasByProxiability(
     mergedTypeInfo,
     sourceSubschemaOrSourceSubschemas,
-    targetSubschemas,
-    typeName
+    targetSubschemas
   );
 
   const { delegationMap, unproxiableFieldNodes } = buildDelegationPlan(mergedTypeInfo, fieldNodes, proxiableSubschemas);

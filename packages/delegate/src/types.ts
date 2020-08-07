@@ -81,6 +81,7 @@ export interface ICreateRequest {
 }
 
 export interface MergedTypeInfo {
+  typeName: string;
   targetSubschemas: Map<SubschemaConfig, Array<SubschemaConfig>>;
   selectionSet?: SelectionSetNode;
   uniqueFields: Record<string, SubschemaConfig>;

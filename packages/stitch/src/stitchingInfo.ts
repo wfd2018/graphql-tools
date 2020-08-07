@@ -164,6 +164,7 @@ function createMergedTypes(
         });
 
         mergedTypes[typeName] = {
+          typeName,
           targetSubschemas,
           typeMaps,
           selectionSets,
